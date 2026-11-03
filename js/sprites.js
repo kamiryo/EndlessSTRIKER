@@ -1,5 +1,43 @@
-// Pixel Art Sprite Matrices & Bitmap Font Helper
-// Drawn directly onto Canvas at 1x1 pixel resolution (320x180) for razor-sharp retro visuals
+// Pixel Art Sprite Matrices, Custom Illustrator Asset Loader & Bitmap Font Helper
+// Default: Procedural 1x1 pixel art on 320x180 Canvas.
+// Optional: Drop PNG/WebP files into assets/ and set paths in CUSTOM_ASSETS below!
+
+const CUSTOM_ASSETS = {
+  // --- キャラクター・アイテム・UIスプライト (透過PNG推奨) ---
+  PLAYER_1: null,      // 例: 'assets/player_1.png'   (表示サイズ: 14x16)
+  PLAYER_2: null,      // 例: 'assets/player_2.png'   (表示サイズ: 14x16)
+  DEF_RUN_1: null,     // 例: 'assets/def_run_1.png'  (表示サイズ: 14x16)
+  DEF_RUN_2: null,     // 例: 'assets/def_run_2.png'  (表示サイズ: 14x16)
+  DEF_SLIDE: null,     // 例: 'assets/def_slide.png'  (表示サイズ: 18x12)
+  BALL_1: null,        // 例: 'assets/ball_1.png'     (表示サイズ: 7x7)
+  BALL_2: null,        // 例: 'assets/ball_2.png'     (表示サイズ: 7x7)
+  STAR_BALL: null,     // 例: 'assets/star_ball.png'  (表示サイズ: 7x7)
+  CONE: null,          // 例: 'assets/cone.png'       (表示サイズ: 10x11)
+  COIN_1: null,        // 例: 'assets/coin_1.png'     (表示サイズ: 7x8)
+  COIN_2: null,        // 例: 'assets/coin_2.png'     (表示サイズ: 7x8)
+  LIFE_CROWN: null,    // 例: 'assets/life_crown.png' (表示サイズ: 8x6)
+
+  // --- 背景・タイトル画面レイヤー ---
+  TITLE_BG: null,      // 例: 'assets/title_bg.png'   (表示サイズ: 320x180 タイトル背景全体)
+  TITLE_LOGO: null,    // 例: 'assets/title_logo.png' (タイトルロゴ画像)
+  BG_SKY: null,        // 例: 'assets/bg_sky.png'     (表示サイズ: 320x26 空背景)
+  BG_STADIUM: null,    // 例: 'assets/bg_stadium.png' (表示サイズ: 64x12 横ループ看板・観客席)
+  BG_PITCH: null       // 例: 'assets/bg_pitch.png'   (表示サイズ: 320x114 芝生フィールド横ループ背景)
+};
+
+const _customImageCache = {};
+
+function getCustomImage(key) {
+  const path = CUSTOM_ASSETS[key];
+  if (!path) return null;
+  if (!_customImageCache[key]) {
+    const img = new Image();
+    img.src = path;
+    _customImageCache[key] = img;
+  }
+  const img = _customImageCache[key];
+  return (img.complete && img.naturalWidth > 0) ? img : null;
+}
 
 const PALETTE = {
   '.': null,
@@ -200,7 +238,7 @@ const SPRITES = {
   ]
 };
 
-// Pre-cache sprite patterns or draw directly onto context
+// Pre-cache sprite patterns or draw directly onto context (with custom illustrator image support)
 function drawSprite(ctx, spriteKey, x, y, scale = 1, flipX = false, overrideColor = null) {
   const rows = SPRITES[spriteKey];
   if (!rows) return;
@@ -208,8 +246,24 @@ function drawSprite(ctx, spriteKey, x, y, scale = 1, flipX = false, overrideColo
   const rx = Math.round(x);
   const ry = Math.round(y);
   const w = rows[0].length;
+  const h = rows.length;
 
-  for (let r = 0; r < rows.length; r++) {
+  // Use custom illustrator image if configured & loaded (and not flashing a solid override color)
+  const customImg = !overrideColor ? getCustomImage(spriteKey) : null;
+  if (customImg) {
+    ctx.save();
+    if (flipX) {
+      ctx.translate(rx + w * scale, ry);
+      ctx.scale(-1, 1);
+      ctx.drawImage(customImg, 0, 0, w * scale, h * scale);
+    } else {
+      ctx.drawImage(customImg, rx, ry, w * scale, h * scale);
+    }
+    ctx.restore();
+    return;
+  }
+
+  for (let r = 0; r < h; r++) {
     const rowStr = rows[r];
     for (let c = 0; c < w; c++) {
       const ch = rowStr[c];
@@ -307,5 +361,7 @@ function drawPixelText(ctx, text, x, y, scale = 1, color = '#ffffff', shadowColo
 }
 
 window.SPRITES = SPRITES;
+window.CUSTOM_ASSETS = CUSTOM_ASSETS;
+window.getCustomImage = getCustomImage;
 window.drawSprite = drawSprite;
 window.drawPixelText = drawPixelText;

@@ -461,81 +461,87 @@
   // =========================================================================
 
   function drawTitleScreen() {
-    // Pure black arcade background
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(0, 0, W, H);
+    const customTitleBg = window.getCustomImage && window.getCustomImage('TITLE_BG');
+    if (customTitleBg) {
+      ctx.drawImage(customTitleBg, 0, 0, W, H);
+    } else {
+      // Pure black arcade background
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, W, H);
 
-    // Falling stadium confetti across the title area
-    const confettiColors = ['#ffd83b', '#3868ff', '#ff3344', '#56e364', '#ffffff', '#4cc3ff'];
-    for (let i = 0; i < 28; i++) {
-      const cx = (i * 37 + Math.floor(Math.sin(frameCount * 0.04 + i) * 8)) % (W - 60) + 30;
-      const cy = ((i * 19 + Math.floor(frameCount * (0.4 + (i % 3) * 0.15))) % 98) + 8;
-      const color = confettiColors[i % confettiColors.length];
-      ctx.fillStyle = color;
-      // Flutter effect (alternates 2x2 and 2x1)
-      const h = (Math.floor(frameCount / 6) + i) % 2 === 0 ? 2 : 1;
-      ctx.fillRect(cx, cy, 2, h);
+      // Falling stadium confetti across the title area
+      const confettiColors = ['#ffd83b', '#3868ff', '#ff3344', '#56e364', '#ffffff', '#4cc3ff'];
+      for (let i = 0; i < 28; i++) {
+        const cx = (i * 37 + Math.floor(Math.sin(frameCount * 0.04 + i) * 8)) % (W - 60) + 30;
+        const cy = ((i * 19 + Math.floor(frameCount * (0.4 + (i % 3) * 0.15))) % 98) + 8;
+        const color = confettiColors[i % confettiColors.length];
+        ctx.fillStyle = color;
+        const h = (Math.floor(frameCount / 6) + i) % 2 === 0 ? 2 : 1;
+        ctx.fillRect(cx, cy, 2, h);
+      }
+
+      // Soccer Stadium Goalpost & Mesh Net (center vignette above the pitch strip)
+      const goalX = 96;
+      const goalY = 58;
+      const goalW = 128;
+      const goalH = 36;
+
+      // Back goal depth frame
+      ctx.fillStyle = '#1b243b';
+      ctx.fillRect(goalX + 5, goalY + 4, goalW - 10, goalH - 4);
+
+      // Goal Net (crisscross pixel mesh that ripples subtly)
+      ctx.fillStyle = '#43547a';
+      const netRipple = Math.floor(Math.sin(frameCount * 0.1) * 1);
+      for (let nx = goalX + 6; nx < goalX + goalW - 6; nx += 5) {
+        ctx.fillRect(nx, goalY + 3, 1, goalH - 3);
+      }
+      for (let ny = goalY + 5; ny < goalY + goalH; ny += 5) {
+        ctx.fillRect(goalX + 4, ny + netRipple, goalW - 8, 1);
+      }
+
+      // White Goalposts & Crossbar
+      ctx.fillStyle = '#d4dce8';
+      ctx.fillRect(goalX + 4, goalY + 3, 2, goalH - 3);
+      ctx.fillRect(goalX + goalW - 6, goalY + 3, 2, goalH - 3);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(goalX, goalY, goalW, 3);
+      ctx.fillRect(goalX, goalY, 3, goalH);
+      ctx.fillRect(goalX + goalW - 3, goalY, 3, goalH);
+
+      // Animated pixel pitch turf strip & bouncing soccer ball across the goal line (x: 68 to 252, y: 94)
+      const stripLeft = 68;
+      const stripW = 184;
+      const stripY = 94;
+
+      ctx.fillStyle = '#1b7d36';
+      ctx.fillRect(stripLeft, stripY + 4, stripW, 6);
+      ctx.fillStyle = '#36c959';
+      ctx.fillRect(stripLeft, stripY + 2, stripW, 3);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(goalX - 2, stripY + 2, goalW + 4, 1);
+
+      for (let gx = 0; gx < stripW; gx += 4) {
+        const waveH = Math.floor(Math.sin((gx + frameCount * 2) * 0.12) * 2);
+        ctx.fillStyle = '#56e364';
+        ctx.fillRect(stripLeft + gx, stripY + waveH, 2, 3);
+      }
     }
 
-    // Main Title Logo: "STRIKER"
-    drawPixelText(ctx, 'STRIKER', W / 2, 22, 5, '#3868ff', '#162870', 'center', 1);
-    // Crisp highlight accent on top of title
-    drawPixelText(ctx, 'STRIKER', W / 2 - 1, 21, 5, '#ffffff', null, 'center', 1);
-    drawPixelText(ctx, 'STRIKER', W / 2, 22, 5, '#3868ff', null, 'center', 1);
-
-    // Soccer Stadium Goalpost & Mesh Net (center vignette above the pitch strip)
-    const goalX = 96;
-    const goalY = 58;
-    const goalW = 128;
-    const goalH = 36;
-
-    // Back goal depth frame
-    ctx.fillStyle = '#1b243b';
-    ctx.fillRect(goalX + 5, goalY + 4, goalW - 10, goalH - 4);
-
-    // Goal Net (crisscross pixel mesh that ripples subtly)
-    ctx.fillStyle = '#43547a';
-    const netRipple = Math.floor(Math.sin(frameCount * 0.1) * 1);
-    for (let nx = goalX + 6; nx < goalX + goalW - 6; nx += 5) {
-      ctx.fillRect(nx, goalY + 3, 1, goalH - 3);
-    }
-    for (let ny = goalY + 5; ny < goalY + goalH; ny += 5) {
-      ctx.fillRect(goalX + 4, ny + netRipple, goalW - 8, 1);
-    }
-
-    // White Goalposts & Crossbar
-    ctx.fillStyle = '#d4dce8';
-    ctx.fillRect(goalX + 4, goalY + 3, 2, goalH - 3); // Left back support
-    ctx.fillRect(goalX + goalW - 6, goalY + 3, 2, goalH - 3); // Right back support
-
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(goalX, goalY, goalW, 3); // Top crossbar
-    ctx.fillRect(goalX, goalY, 3, goalH); // Left front post
-    ctx.fillRect(goalX + goalW - 3, goalY, 3, goalH); // Right front post
-
-    // Animated pixel pitch turf strip & bouncing soccer ball across the goal line (x: 68 to 252, y: 94)
-    const stripLeft = 68;
-    const stripW = 184;
-    const stripY = 94;
-
-    // Deep turf base
-    ctx.fillStyle = '#1b7d36';
-    ctx.fillRect(stripLeft, stripY + 4, stripW, 6);
-    ctx.fillStyle = '#36c959';
-    ctx.fillRect(stripLeft, stripY + 2, stripW, 3);
-
-    // White goal line chalk
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(goalX - 2, stripY + 2, goalW + 4, 1);
-
-    // Animated grass blades along the strip
-    for (let gx = 0; gx < stripW; gx += 4) {
-      const waveH = Math.floor(Math.sin((gx + frameCount * 2) * 0.12) * 2);
-      ctx.fillStyle = '#56e364';
-      ctx.fillRect(stripLeft + gx, stripY + waveH, 2, 3);
+    // Main Title Logo: Custom image or "STRIKER" pixel logo
+    const customLogo = window.getCustomImage && window.getCustomImage('TITLE_LOGO');
+    if (customLogo) {
+      ctx.drawImage(customLogo, Math.round((W - 160) / 2), 12, 160, 40);
+    } else {
+      drawPixelText(ctx, 'STRIKER', W / 2, 22, 5, '#3868ff', '#162870', 'center', 1);
+      drawPixelText(ctx, 'STRIKER', W / 2 - 1, 21, 5, '#ffffff', null, 'center', 1);
+      drawPixelText(ctx, 'STRIKER', W / 2, 22, 5, '#3868ff', null, 'center', 1);
     }
 
     // Mini animated striker & bouncing ball in front of the goal net
+    const stripY = 94;
     const titlePlayerFrame = Math.floor(frameCount / 8) % 2 === 0 ? 'PLAYER_1' : 'PLAYER_2';
     drawSprite(ctx, titlePlayerFrame, 144, stripY - 14, 1);
     const bounceY = Math.abs(Math.sin(frameCount * 0.15)) * 6;
@@ -551,91 +557,104 @@
   }
 
   function drawPitchEnvironment() {
-    // 1. Bright retro blue sky (y: 0 to 26)
-    ctx.fillStyle = '#2d92ff';
-    ctx.fillRect(0, 0, W, 14);
-    ctx.fillStyle = '#4cacff';
-    ctx.fillRect(0, 14, W, 14);
+    // 1. Sky & Clouds (y: 0 to 26)
+    const customSky = window.getCustomImage && window.getCustomImage('BG_SKY');
+    if (customSky) {
+      ctx.drawImage(customSky, 0, 0, W, 26);
+    } else {
+      ctx.fillStyle = '#2d92ff';
+      ctx.fillRect(0, 0, W, 14);
+      ctx.fillStyle = '#4cacff';
+      ctx.fillRect(0, 14, W, 14);
 
-    // Pixel clouds in the sky
-    ctx.fillStyle = '#e8f6ff';
-    for (const c of clouds) {
-      const cx = Math.round(c.x);
-      const cy = Math.round(c.y);
-      ctx.fillRect(cx, cy + 3, c.w, 4);
-      ctx.fillRect(cx + 4, cy + 1, c.w - 8, 2);
-      ctx.fillRect(cx + 7, cy, c.w - 14, 1);
+      ctx.fillStyle = '#e8f6ff';
+      for (const c of clouds) {
+        const cx = Math.round(c.x);
+        const cy = Math.round(c.y);
+        ctx.fillRect(cx, cy + 3, c.w, 4);
+        ctx.fillRect(cx + 4, cy + 1, c.w - 8, 2);
+        ctx.fillRect(cx + 7, cy, c.w - 14, 1);
+      }
     }
 
-    // 2. White foamy / chalk stadium horizon border (y: 26 to 38) - evokes the white wave crest in screenshots 2-4
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 26, W, 5);
-
-    // Scrolling stadium ad boards & pixel turf border
-    const boardOffset = Math.floor(scrollX) % 64;
-    for (let bx = -boardOffset; bx < W; bx += 64) {
-      // Ad board segments
-      ctx.fillStyle = '#18348c';
-      ctx.fillRect(bx, 30, 30, 5);
-      ctx.fillStyle = '#ffd83b';
-      ctx.fillRect(bx + 4, 31, 22, 2);
-
-      ctx.fillStyle = '#d92638';
-      ctx.fillRect(bx + 32, 30, 30, 5);
+    // 2. Stadium horizon & ad boards (y: 26 to 38)
+    const customStadium = window.getCustomImage && window.getCustomImage('BG_STADIUM');
+    if (customStadium) {
+      const boardOffset = Math.floor(scrollX) % 64;
+      for (let bx = -boardOffset; bx < W; bx += 64) {
+        ctx.drawImage(customStadium, bx, 26, 64, 12);
+      }
+    } else {
       ctx.fillStyle = '#ffffff';
-      ctx.fillRect(bx + 36, 31, 22, 2);
-    }
+      ctx.fillRect(0, 26, W, 5);
 
-    // White chalk touchline at y=36..38
-    ctx.fillStyle = '#e8f8ec';
-    ctx.fillRect(0, 36, W, 2);
+      const boardOffset = Math.floor(scrollX) % 64;
+      for (let bx = -boardOffset; bx < W; bx += 64) {
+        ctx.fillStyle = '#18348c';
+        ctx.fillRect(bx, 30, 30, 5);
+        ctx.fillStyle = '#ffd83b';
+        ctx.fillRect(bx + 4, 31, 22, 2);
 
-    // 3. Layered Horizontal Pitch Bands with scrolling vertical pixel strokes (just like the wave bands in screenshots 2-4!)
-    const bands = [
-      { y: 38, h: 20, bg: '#268c3e', blade: '#34a84e', density: 4 },
-      { y: 58, h: 24, bg: '#2e9e47', blade: '#3eb859', density: 5 },
-      { y: 82, h: 24, bg: '#38b052', blade: '#4acc66', density: 5 },
-      { y: 106, h: 22, bg: '#42c25d', blade: '#58de75', density: 4 },
-      { y: 128, h: 24, bg: '#4dd168', blade: '#68eb83', density: 4 }
-    ];
-
-    for (let b = 0; b < bands.length; b++) {
-      const band = bands[b];
-      ctx.fillStyle = band.bg;
-      ctx.fillRect(0, band.y, W, band.h);
-
-      // Horizontal row of crisp vertical pixel grass strokes (recreates the exact pixel texture from screenshots 2-4)
-      ctx.fillStyle = band.blade;
-      const rowOffset = Math.floor(scrollX * (0.9 + b * 0.08)) % 6;
-      for (let gx = -rowOffset; gx < W; gx += 6) {
-        const jitter = ((gx + b * 7) % 3);
-        ctx.fillRect(gx, band.y + jitter, 1, 5);
-        ctx.fillRect(gx + 2, band.y + 2 + jitter, 1, 4);
-      }
-    }
-
-    // 4. Scrolling white pitch lines (halfway line, center circle, penalty box)
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
-    for (const line of pitchLines) {
-      const lx = Math.round(line.x);
-      // Perspective-slanted vertical line
-      for (let py = PITCH_TOP; py < PITCH_BOTTOM; py += 2) {
-        const slant = Math.floor((py - PITCH_TOP) * 0.12);
-        ctx.fillRect(lx - slant, py, 2, 2);
+        ctx.fillStyle = '#d92638';
+        ctx.fillRect(bx + 32, 30, 30, 5);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(bx + 36, 31, 22, 2);
       }
 
-      if (line.type === 'center') {
-        // Center spot
-        const cy = 92;
-        const slant = Math.floor((cy - PITCH_TOP) * 0.12);
-        ctx.fillRect(lx - slant - 3, cy - 2, 6, 4);
-      }
+      ctx.fillStyle = '#e8f8ec';
+      ctx.fillRect(0, 36, W, 2);
     }
 
-    // Scrolling bright grass flecks
-    ctx.fillStyle = '#75ff90';
-    for (const t of grassTufts) {
-      ctx.fillRect(Math.round(t.x), Math.round(t.y), t.size, 1);
+    // 3. Pitch Turf (y: 38 to 152)
+    const customPitch = window.getCustomImage && window.getCustomImage('BG_PITCH');
+    if (customPitch) {
+      const pitchOffset = Math.floor(scrollX) % W;
+      ctx.drawImage(customPitch, -pitchOffset, PITCH_TOP, W, PITCH_BOTTOM - PITCH_TOP);
+      ctx.drawImage(customPitch, W - pitchOffset, PITCH_TOP, W, PITCH_BOTTOM - PITCH_TOP);
+    } else {
+      const bands = [
+        { y: 38, h: 20, bg: '#268c3e', blade: '#34a84e', density: 4 },
+        { y: 58, h: 24, bg: '#2e9e47', blade: '#3eb859', density: 5 },
+        { y: 82, h: 24, bg: '#38b052', blade: '#4acc66', density: 5 },
+        { y: 106, h: 22, bg: '#42c25d', blade: '#58de75', density: 4 },
+        { y: 128, h: 24, bg: '#4dd168', blade: '#68eb83', density: 4 }
+      ];
+
+      for (let b = 0; b < bands.length; b++) {
+        const band = bands[b];
+        ctx.fillStyle = band.bg;
+        ctx.fillRect(0, band.y, W, band.h);
+
+        ctx.fillStyle = band.blade;
+        const rowOffset = Math.floor(scrollX * (0.9 + b * 0.08)) % 6;
+        for (let gx = -rowOffset; gx < W; gx += 6) {
+          const jitter = ((gx + b * 7) % 3);
+          ctx.fillRect(gx, band.y + jitter, 1, 5);
+          ctx.fillRect(gx + 2, band.y + 2 + jitter, 1, 4);
+        }
+      }
+
+      // 4. Scrolling white pitch lines (halfway line, center circle, penalty box)
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+      for (const line of pitchLines) {
+        const lx = Math.round(line.x);
+        for (let py = PITCH_TOP; py < PITCH_BOTTOM; py += 2) {
+          const slant = Math.floor((py - PITCH_TOP) * 0.12);
+          ctx.fillRect(lx - slant, py, 2, 2);
+        }
+
+        if (line.type === 'center') {
+          const cy = 92;
+          const slant = Math.floor((cy - PITCH_TOP) * 0.12);
+          ctx.fillRect(lx - slant - 3, cy - 2, 6, 4);
+        }
+      }
+
+      // Scrolling bright grass flecks
+      ctx.fillStyle = '#75ff90';
+      for (const t of grassTufts) {
+        ctx.fillRect(Math.round(t.x), Math.round(t.y), t.size, 1);
+      }
     }
   }
 
