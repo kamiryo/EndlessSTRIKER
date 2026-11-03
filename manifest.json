@@ -1,0 +1,9 @@
+{
+  "name": "STRIKER - Retro 8-Bit Soccer",
+  "short_name": "STRIKER",
+  "start_url": "./index.html",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#000000",
+  "theme_color": "#000000"
+}

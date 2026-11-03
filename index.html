@@ -4,7 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#000000" />
+  <link rel="manifest" href="manifest.json" />
   <title>STRIKER - Retro 8-Bit Soccer Runner</title>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -17,6 +20,7 @@
         <span class="cart-title">8-BIT SOCCER CARTRIDGE</span>
       </div>
       <div class="controls-bar">
+        <button id="btn-full" class="ui-btn" type="button" title="フルスクリーン切替">FULL</button>
         <button id="btn-crt" class="ui-btn active" type="button" title="CRTスキャンライン切替">CRT: ON</button>
         <button id="btn-sound" class="ui-btn active" type="button" title="サウンド切替">SOUND: ON</button>
       </div>

@@ -210,7 +210,46 @@ html, body {
   color: var(--accent-yellow);
 }
 
-/* Fullscreen edge-to-edge layout on mobile landscape */
+/* Fullscreen edge-to-edge layout on mobile landscape or Fullscreen API */
+:fullscreen .app-shell,
+:-webkit-full-screen .app-shell {
+  padding: 0;
+  width: 100vw;
+  height: 100dvh;
+}
+:fullscreen .top-bar,
+:-webkit-full-screen .top-bar {
+  position: fixed;
+  top: 6px;
+  right: 8px;
+  width: auto;
+  z-index: 20;
+}
+:fullscreen .cartridge-badge,
+:-webkit-full-screen .cartridge-badge,
+:fullscreen .bottom-hint,
+:-webkit-full-screen .bottom-hint {
+  display: none;
+}
+:fullscreen .screen-wrapper,
+:-webkit-full-screen .screen-wrapper {
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  padding: 0;
+}
+:fullscreen .crt-frame,
+:-webkit-full-screen .crt-frame {
+  width: 100vw;
+  height: 100dvh;
+  max-height: none;
+  aspect-ratio: auto;
+  border: none;
+  outline: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
 @media (orientation: landscape) and (max-height: 600px),
        (pointer: coarse) and (orientation: landscape) {
   html, body {

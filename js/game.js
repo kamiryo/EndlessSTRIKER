@@ -899,7 +899,35 @@
     }
   });
 
-  // UI Buttons (CRT toggle & Sound toggle)
+  // UI Buttons (Fullscreen, CRT toggle & Sound toggle)
+  const btnFull = document.getElementById('btn-full');
+  if (btnFull) {
+    btnFull.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const docEl = document.documentElement;
+      const isFull = document.fullscreenElement || document.webkitFullscreenElement;
+      try {
+        if (!isFull) {
+          if (docEl.requestFullscreen) await docEl.requestFullscreen();
+          else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
+          if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(() => {});
+          }
+        } else {
+          if (document.exitFullscreen) await document.exitFullscreen();
+          else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        }
+      } catch (_) {}
+    });
+
+    const syncFullBtn = () => {
+      const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      btnFull.classList.toggle('active', isFull);
+    };
+    document.addEventListener('fullscreenchange', syncFullBtn);
+    document.addEventListener('webkitfullscreenchange', syncFullBtn);
+  }
+
   const btnCrt = document.getElementById('btn-crt');
   const scanlines = document.getElementById('scanlines');
   btnCrt.addEventListener('click', (e) => {
